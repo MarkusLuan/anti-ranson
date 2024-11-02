@@ -3,8 +3,12 @@ import datetime
 import argparse
 
 def main (pasta_arquivos_infectados: str, dt_infeccao: datetime.date, extensao: str):
-    f_infectados = open("arquivos_infectados.txt", "w")
-    f_seguros = open("arquivos_seguros.txt", "w")
+    unidade = os.path.basename(pasta_arquivos_infectados)
+    if pasta_arquivos_infectados.endswith(":/"):
+        unidade = pasta_arquivos_infectados.replace(":/", "")
+    
+    f_infectados = open(f"arquivos_infectados_{unidade}.txt", "w")
+    f_seguros = open(f"arquivos_seguros_{unidade}.txt", "w")
     
     # Percorre o diretório e verifica os arquivos
     print(f"Escaneando arquivos...")
