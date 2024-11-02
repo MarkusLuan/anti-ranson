@@ -22,15 +22,20 @@ def main (pasta_arquivos_infectados: str, dt_infeccao: datetime.date, extensao: 
                    f_infectados.write(f"{file_path} \n")
                    continue
             
-            dt_criacao = datetime.datetime.fromtimestamp(os.path.getctime(file_path))
-            dt_modificacao = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
-            
-            if (extensao and file.endswith(extensao)) or (dt_criacao >= dt_infeccao or dt_modificacao >= dt_infeccao):
-                print(f"Arquivo infectado localizado: {file}")
+            try:
+                dt_criacao = datetime.datetime.fromtimestamp(os.path.getctime(file_path))
+                dt_modificacao = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+                
+                if (extensao and file.endswith(extensao)) or (dt_criacao >= dt_infeccao or dt_modificacao >= dt_infeccao):
+                    print(f"Arquivo infectado localizado: {file}")
+                    f_infectados.write(f"{file_path} \n")
+                else:
+                    print(f"O arquivo aparentemente está seguro: {file}")
+                    f_seguros.write(f"{file_path} \n")
+            except Exception as e:
+                print(f"Ocorreu um erro ao analisar o arquivo: {file}\nConsiderando como corrompido\nErro: {e}\n")
                 f_infectados.write(f"{file_path} \n")
-            else:
-                print(f"O arquivo aparentemente está seguro: {file}")
-                f_seguros.write(f"{file_path} \n")
+                continue
     
     f_infectados.close()
     f_seguros.close()
