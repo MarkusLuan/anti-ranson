@@ -27,7 +27,7 @@ def main (pasta_arquivos_infectados: str, dt_infeccao: datetime.date, extensao: 
                 dt_modificacao = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
                 
                 if (extensao and file.endswith(extensao)) or (dt_criacao >= dt_infeccao or dt_modificacao >= dt_infeccao):
-                    print(f"Arquivo infectado localizado: {file}")
+                    print(f"Arquivo infectado localizado: {file} | Criado em: {dt_criacao.isoformat()} | Modificado em: {dt_modificacao.isoformat()}")
                     f_infectados.write(f"{file_path} \n")
                 else:
                     print(f"O arquivo aparentemente está seguro: {file}")
