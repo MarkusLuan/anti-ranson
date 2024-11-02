@@ -15,6 +15,13 @@ def main (pasta_arquivos_infectados: str, dt_infeccao: datetime.date, extensao: 
     for root, _, files in os.walk(pasta_arquivos_infectados):
         for file in files:
             file_path = os.path.join(root, file)
+            
+            if os.path.islink(file_path):
+               if not os.path.exists(os.readlink(file_path)):
+                   print(f"O arquivo aponta para um link invalido: {file}")
+                   f_infectados.write(f"{file_path} \n")
+                   continue
+            
             dt_criacao = datetime.datetime.fromtimestamp(os.path.getctime(file_path))
             dt_modificacao = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
             
