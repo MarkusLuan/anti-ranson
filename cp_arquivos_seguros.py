@@ -13,20 +13,34 @@ def get_lista_arquivos(arquivo: str):
         arquivos = f.readlines()
     return arquivos
 
+def get_arquivo_destino(arquivo: str, unidade: str, pasta_destino: str):
+    return arquivo\
+        .replace(f"/mnt/{unidade}/", f"{pasta_destino}/")\
+        .replace(f"{unidade}:\\", f"{pasta_destino}\\")
+
 def main (unidade: str, destino: str):
     arquivos_seguros = get_lista_arquivos(f"arquivos_seguros_{unidade}.txt")
     arquivos_meta_alterados = get_lista_arquivos(f"arquivos_meta_alterados_{unidade}.txt")
     
+    # Criar a pasta de destino
+    pasta_destino = os.path.join(destino, unidade)
+    if not os.path.isdir(pasta_destino):
+        os.mkdir(pasta_destino)
+    
     print(f"{constantes.COLOR_BLUE}Copiando arquivos...{constantes.COLOR_RESET}")
     for arquivo in arquivos_seguros:
+        arquivo = arquivo.strip()
         print(f"{constantes.COLOR_GREEN}Copiando {arquivo}...{constantes.COLOR_RESET}")
         
+        pasta = pasta_destino
         if arquivo in arquivos_meta_alterados:
             print(f"{constantes.COLOR_YELLOW}{os.path.basename(arquivo)} teve os metadados alterados!\nMantendo separado!{constantes.COLOR_RESET}")
-            pass
+            
+            pasta += "arquivos_metadados_alterados"
+            if not os.path.isdir(pasta):
+                os.mkdir(pasta)
         
-        break
-        # shutil.copy()
+        shutil.copy(arquivo, get_arquivo_destino(arquivo, unidade, pasta))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Copia os arquivos que foram considerados seguros pelo escaner.")
