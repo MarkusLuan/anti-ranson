@@ -8,6 +8,7 @@ def main (pasta_arquivos_infectados: str, dt_infeccao: datetime.date, extensao: 
         unidade = pasta_arquivos_infectados.replace(":/", "")
     
     f_infectados = open(f"arquivos_infectados_{unidade}.txt", "w")
+    f_meta_alterados = open(f"arquivos_meta_alterados_{unidade}.txt", "w")
     f_seguros = open(f"arquivos_seguros_{unidade}.txt", "w")
     
     # Percorre o diretório e verifica os arquivos
@@ -23,13 +24,19 @@ def main (pasta_arquivos_infectados: str, dt_infeccao: datetime.date, extensao: 
                    continue
             
             try:
-                dt_criacao = datetime.datetime.fromtimestamp(os.path.getctime(file_path))
-                dt_modificacao = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+                stat_info = os.stat(file_path)
+
+                dt_alteracao_metadados = datetime.datetime.fromtimestamp(stat_info.st_ctime)
+                dt_modificacao = datetime.datetime.fromtimestamp(stat_info.st_mtime)
                 
-                if (extensao and file.endswith(extensao)) or (dt_criacao >= dt_infeccao or dt_modificacao >= dt_infeccao):
-                    print(f"Arquivo infectado localizado: {file} | Criado em: {dt_criacao.isoformat()} | Modificado em: {dt_modificacao.isoformat()}")
+                if (extensao and file.endswith(extensao)) or dt_modificacao >= dt_infeccao:
+                    print(f"Arquivo infectado localizado: {file} | Criado em: {dt_alteracao_metadados.isoformat()} | Modificado em: {dt_modificacao.isoformat()}")
                     f_infectados.write(f"{file_path} \n")
                 else:
+                    if dt_alteracao_metadados >= dt_infeccao:
+                        print(f"Os metadados do arquivo foram modificados: {file}")
+                        f_meta_alterados.write(f"{file_path} \n")
+                    
                     print(f"O arquivo aparentemente está seguro: {file}")
                     f_seguros.write(f"{file_path} \n")
             except Exception as e:
@@ -38,6 +45,7 @@ def main (pasta_arquivos_infectados: str, dt_infeccao: datetime.date, extensao: 
                 continue
     
     f_infectados.close()
+    f_meta_alterados.close()
     f_seguros.close()
 
     print(f"Escaneamento concluído!")

@@ -1,0 +1,5 @@
+.env/
+
+teste*.py
+*.txt
+*.log
