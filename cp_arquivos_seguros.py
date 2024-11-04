@@ -33,6 +33,11 @@ def main (unidade: str, destino: str, pastas_ignoradas: list):
         arquivo = arquivo.strip()
         print(f"{constantes.COLOR_GREEN}Copiando {arquivo}...{constantes.COLOR_RESET}")
         
+        # Evitando 'arquivos fantasmas'
+        if not os.path.isfile(arquivo):
+            print(f"{constantes.COLOR_RED}O arquivo não existe{constantes.COLOR_RESET}")
+            continue
+        
         pasta_destino = os.path.join(destino, unidade)
         if arquivo in arquivos_meta_alterados:
             print(f"{constantes.COLOR_YELLOW}{os.path.basename(arquivo)} teve os metadados alterados!\nMantendo separado!{constantes.COLOR_RESET}")
@@ -43,7 +48,7 @@ def main (unidade: str, destino: str, pastas_ignoradas: list):
         nome_arquivo = os.path.basename(arquivo)
         
         if is_pasta_ignorada(pasta, pastas_ignoradas):
-            print(f"{constantes.COLOR_YELLOW}Ignorando pasta...")
+            print(f"{constantes.COLOR_YELLOW}Ignorando pasta...{constantes.COLOR_RESET}")
             continue
         
         if pasta:
@@ -51,8 +56,11 @@ def main (unidade: str, destino: str, pastas_ignoradas: list):
         if not os.path.isdir(pasta_destino):
             os.makedirs(pasta_destino)
         arquivo_destino = os.path.join(pasta_destino, nome_arquivo)
-            
-        shutil.copy(arquivo, arquivo_destino)
+        
+        try:
+            shutil.copy(arquivo, arquivo_destino)
+        except Exception as e:
+            print(f"{constantes.COLOR_RED}Ocorreu um erro ao copiar arquivo: {e}{constantes.COLOR_RESET}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Copia os arquivos que foram considerados seguros pelo escaner.")
