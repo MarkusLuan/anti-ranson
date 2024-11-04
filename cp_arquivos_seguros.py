@@ -17,30 +17,37 @@ def get_arquivo_destino(arquivo: str, unidade: str, pasta_destino: str):
     return arquivo\
         .replace(f"/mnt/{unidade}/", f"{pasta_destino}/")\
         .replace(f"{unidade}:\\", f"{pasta_destino}\\")
+        
+def get_caminho_relativo(arquivo: str, unidade: str):
+    return arquivo\
+        .replace(f"/mnt/{unidade}/", "")\
+        .replace(f"{unidade}:\\", "")
 
 def main (unidade: str, destino: str):
     arquivos_seguros = get_lista_arquivos(f"arquivos_seguros_{unidade}.txt")
     arquivos_meta_alterados = get_lista_arquivos(f"arquivos_meta_alterados_{unidade}.txt")
-    
-    # Criar a pasta de destino
-    pasta_destino = os.path.join(destino, unidade)
-    if not os.path.isdir(pasta_destino):
-        os.mkdir(pasta_destino)
     
     print(f"{constantes.COLOR_BLUE}Copiando arquivos...{constantes.COLOR_RESET}")
     for arquivo in arquivos_seguros:
         arquivo = arquivo.strip()
         print(f"{constantes.COLOR_GREEN}Copiando {arquivo}...{constantes.COLOR_RESET}")
         
-        pasta = pasta_destino
+        pasta_destino = os.path.join(destino, unidade)
         if arquivo in arquivos_meta_alterados:
             print(f"{constantes.COLOR_YELLOW}{os.path.basename(arquivo)} teve os metadados alterados!\nMantendo separado!{constantes.COLOR_RESET}")
             
-            pasta += "arquivos_metadados_alterados"
-            if not os.path.isdir(pasta):
-                os.mkdir(pasta)
+            pasta_destino = os.path.join(pasta_destino, "arquivos_metadados_alterados")
+            
+        pasta = os.path.dirname(get_caminho_relativo(arquivo, unidade))
+        nome_arquivo = os.path.basename(arquivo)
         
-        shutil.copy(arquivo, get_arquivo_destino(arquivo, unidade, pasta))
+        if pasta:
+            pasta_destino = os.path.join(pasta_destino, pasta)
+        if not os.path.isdir(pasta_destino):
+            os.makedirs(pasta_destino)
+        arquivo_destino = os.path.join(pasta_destino, nome_arquivo)
+            
+        shutil.copy(arquivo, arquivo_destino)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Copia os arquivos que foram considerados seguros pelo escaner.")
