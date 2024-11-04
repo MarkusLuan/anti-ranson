@@ -12,18 +12,19 @@ def get_lista_arquivos(arquivo: str):
     with open(arquivo, "r") as f:
         arquivos = f.readlines()
     return arquivos
-
-def get_arquivo_destino(arquivo: str, unidade: str, pasta_destino: str):
-    return arquivo\
-        .replace(f"/mnt/{unidade}/", f"{pasta_destino}/")\
-        .replace(f"{unidade}:\\", f"{pasta_destino}\\")
         
 def get_caminho_relativo(arquivo: str, unidade: str):
     return arquivo\
         .replace(f"/mnt/{unidade}/", "")\
         .replace(f"{unidade}:\\", "")
+        
+def is_pasta_ignorada(pasta: str, pastas_ignoradas: list):
+    for p in pastas_ignoradas:
+        if pasta == p or pasta.startswith(f"{p}{os.sep}"):
+            return True
+    return False
 
-def main (unidade: str, destino: str):
+def main (unidade: str, destino: str, pastas_ignoradas: list):
     arquivos_seguros = get_lista_arquivos(f"arquivos_seguros_{unidade}.txt")
     arquivos_meta_alterados = get_lista_arquivos(f"arquivos_meta_alterados_{unidade}.txt")
     
@@ -41,6 +42,10 @@ def main (unidade: str, destino: str):
         pasta = os.path.dirname(get_caminho_relativo(arquivo, unidade))
         nome_arquivo = os.path.basename(arquivo)
         
+        if is_pasta_ignorada(pasta, pastas_ignoradas):
+            print(f"{constantes.COLOR_YELLOW}Ignorando pasta...")
+            continue
+        
         if pasta:
             pasta_destino = os.path.join(pasta_destino, pasta)
         if not os.path.isdir(pasta_destino):
@@ -53,6 +58,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Copia os arquivos que foram considerados seguros pelo escaner.")
     parser.add_argument("--origem", help="HD onde estão os arquivos infectados", required=True)
     parser.add_argument("--destino", help="Pasta onde deseja salvar os arquivos", required=True)
+    parser.add_argument("--ignorar_pasta", action="append", required=False)
 
     args = parser.parse_args()
     
@@ -67,4 +73,5 @@ if __name__ == "__main__":
     if args.origem.endswith(":/"):
         unidade = args.origem.replace(":/", "")
     
-    main(unidade, args.destino)
+    pastas_ignoradas = args.ignorar_pasta or []
+    main(unidade, args.destino, pastas_ignoradas)
