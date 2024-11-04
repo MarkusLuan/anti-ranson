@@ -30,20 +30,20 @@ def main (unidade: str, destino: str, pastas_ignoradas: list):
     
     print(f"{constantes.COLOR_BLUE}Copiando arquivos...{constantes.COLOR_RESET}")
     for arquivo in arquivos_seguros:
-        arquivo = arquivo.strip()
-        print(f"{constantes.COLOR_GREEN}Copiando {arquivo}...{constantes.COLOR_RESET}")
+        print(f"{constantes.COLOR_GREEN}Copiando {arquivo.strip()}...{constantes.COLOR_RESET}")
         
         # Evitando 'arquivos fantasmas'
-        if not os.path.isfile(arquivo):
+        if not os.path.isfile(arquivo.strip()):
             print(f"{constantes.COLOR_RED}O arquivo não existe{constantes.COLOR_RESET}")
             continue
         
         pasta_destino = os.path.join(destino, unidade)
         if arquivo in arquivos_meta_alterados:
-            print(f"{constantes.COLOR_YELLOW}{os.path.basename(arquivo)} teve os metadados alterados!\nMantendo separado!{constantes.COLOR_RESET}")
+            print(f"{constantes.COLOR_YELLOW}{os.path.basename(arquivo.strip())} teve os metadados alterados!\nMantendo separado!{constantes.COLOR_RESET}")
             
             pasta_destino = os.path.join(pasta_destino, "arquivos_metadados_alterados")
-            
+        
+        arquivo = arquivo.strip()
         pasta = os.path.dirname(get_caminho_relativo(arquivo, unidade))
         nome_arquivo = os.path.basename(arquivo)
         
