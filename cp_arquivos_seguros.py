@@ -66,7 +66,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Copia os arquivos que foram considerados seguros pelo escaner.")
     parser.add_argument("--origem", help="HD onde estão os arquivos infectados", required=True)
     parser.add_argument("--destino", help="Pasta onde deseja salvar os arquivos", required=True)
-    parser.add_argument("--ignorar_pasta", action="append", required=False)
+    parser.add_argument("--ignorar", action="append", required=False)
 
     args = parser.parse_args()
     
@@ -81,5 +81,5 @@ if __name__ == "__main__":
     if args.origem.endswith(":/"):
         unidade = args.origem.replace(":/", "")
     
-    pastas_ignoradas = args.ignorar_pasta or []
+    pastas_ignoradas = args.ignorar or []
     main(unidade, args.destino, pastas_ignoradas)

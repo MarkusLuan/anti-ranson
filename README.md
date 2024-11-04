@@ -7,17 +7,54 @@ Descobriram meu usuário, senha e IP, entraram no RDP e instalaram alguns Softwa
 O vírus que me infectou, tem como descrição ELPACO-TEAM.
 
 ### Funcionamento dos meus scripts
-Até o momento só criei um script em python para escanear os arquivos para listar os arquivos que estão infectados e os que não estão. O script verifica com base na data de modificação dos arquivos ou com base na extenção (que o ranson modifica).
-
-Recomendo executar o meu script no linux e montar a partição infectada como apenas leitura
+Recomendo executar os meus scripts no linux e montar a partição infectada como apenas leitura
 ```shell
 mount -o ro /dev/sda1 /mnt/c
 ```
 
-Para executar o script de analise basta passar os parametros
+#### Escaner de arquivos - [analisar_arquivos.py](./analisar_arquivos.py)
+Escaneia os arquivos e indica os que foram infectados, os que estão seguros e os que tiveram metadados alterados.
+O escaner é feito com base na data de modificação dos arquivos ou com base na extenção (que o ranson modifica).
+
+Para executar o script:
 ```shell
-python3 analisar_arquivos.py --caminho /mnt/c --dt_infeccao 26/04/2024 --extensao ELPACO-TEAM-ID
+python3 analisar_arquivos.py --caminho /mnt/c --dt_infeccao 26/04/2024 \[--extensao ELPACO-TEAM-ID\]
 ```
+
+* Caminho é a pasta onde está montado o HD
+* dt_infeccao é a Data de quando o primeiro arquivo foi corrompido
+* Extensao é um argumento opcional e indica qual foi a extensão criada pelo RANSON
+
+#### Copia de arquivos seguros - [cp_arquivos_seguros.py](./cp_arquivos_seguros.py)
+<b>Executar apenas após o escaner.</b>
+Faz a cópia dos arquivos que estão seguros, permitindo fazer uma formatação sem perder os arquivos que não foram infectados
+
+Para executar o script:
+```shell
+python3 cp_arquivos_seguros.py --origem /mnt/c --destino /bkp \[--ignorar pasta\|arquivo\]
+```
+por exemplo
+```shell
+python3 cp_arquivos_seguros.py --origem /mnt/c --destino bkp --ignorar 'Program Files' --ignorar 'Program Files (x86)' --ignorar 'System Volume Information' --ignorar Tesseract-OCR --ignorar Recovery --ignorar DumpStack.log --ignorar_pasta AMD --ignorar '$Recycle.Bin' --ignorar Intel
+```
+
+* Origem é a pasta onde está montado o HD
+* Destino é a pasta onde será salvo o backup
+* Ignorar é usado para indicar quais pastas ou arquivos ignorar e pode ser repetido quantas vezes necessário
+
+#### Listar Programas Instalados - [listar_programas.py](./listar_programas.py)
+Lista os programas instalados com base na pasta
+- C:/Program Files
+- C:/Program Files (x86)
+
+Para executar o script:
+```shell
+python3 listar_programas.py --caminho /mnt/c
+```
+
+* O caminho é a pasta onde está montado o HD
+
+---
 
 ### Algumas informações que descobri sobre o RANSON
 * Os crackers (Hackers do mal) instalaram no meu computador um software chamado 'Process Hacker 2', que roda em segundo plano alguns serviços em modo de kernel. Aparentemente esse processo inicia quando o usuário loga e baixa uma chave publica em c:/Users/{usuario}/Downloads/encryption_public_key.pem para realizar a criptografia.
